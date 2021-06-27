@@ -1,0 +1,10 @@
+baseUrl: https://robot-dreams-de-api.herokuapp.com
+outputDir: "./data"
+auth:
+  endpoint: /auth
+  username: "rd_dreams"
+  password: "djT6LasE"
+api:
+  endpoint: /out_of_stock
+  startDate: "2021-01-02"
+  endDate: "2021-01-03"

@@ -48,13 +48,13 @@ select * from
 (
 	select a.first_name, a.last_name, count(*) actor_film_cnt, dense_rank() over (order by count(*) desc) actor_rank from category c
 	join film_category fc ON fc.category_id = c.category_id 
-	join film f on f.film_id = fc.category_id 
+	join film f on f.film_id = fc.film_id 
 	join film_actor fa on fa.film_id = f.film_id 
 	join actor a on a.actor_id = fa.actor_id 
 	where c.name = 'Children'
 	group by a.actor_id, a.first_name, a.last_name 
 ) q where actor_rank<=3
-order by actor_rank desc;
+order by actor_rank;
 
 
 --6. вывести города с количеством активных и неактивных клиентов (активный — customer.active = 1). Отсортировать по количеству неактивных клиентов по убыванию.
@@ -68,6 +68,24 @@ order by inactive_cnt desc;
 --7. вывести категорию фильмов, у которой самое большое кол-во часов суммарной аренды в городах (customer.address_id в этом city), и которые начинаются на букву “a”. 
 --То же самое сделать для городов в которых есть символ “-”. Написать все в одном запросе.
 
-
-
+with subq as
+(
+	select c.name, ci.city, r.return_date - r.rental_date rental_time from category c 
+	join film_category fc on fc.category_id = c.category_id 
+	join inventory i on fc.film_id = i.film_id
+	join rental r on r.inventory_id = i.inventory_id 
+	join customer cu on r.customer_id = cu.customer_id 
+	join address a on cu.address_id = a.address_id 
+	join city ci on a.city_id = ci.city_id 
+	where r.return_date is not null
+)
+select 'most popular category for A% cities:' title, name from
+(
+	select name, sum(rental_time) rtime, rank() over (order by sum(rental_time) desc) category_rank from subq where lower(city) like 'a%' group by name
+) q where category_rank=1
+union all 
+select 'most popular category for %-% cities:' title, name from
+(
+	select name, sum(rental_time) rtime, rank() over (order by sum(rental_time) desc) category_rank from subq where lower(city) like '%-%' group by name
+) q where category_rank=1;
 

@@ -2,7 +2,6 @@ import logging
 import os
 import requests
 from airflow.hooks.postgres_hook import PostgresHook
-from airflow.hooks.hdfs_hook import HDFSHook
 from airflow.exceptions import AirflowFailException
 from hdfs import InsecureClient
 from pyspark.sql import SparkSession

@@ -4,6 +4,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from datetime import datetime
 from functions.etl_library import db_export
 from functions.etl_library import copy_to_silver
+from functions.etl_library import api_export
 
 hdfs_url = 'http://127.0.0.1:50070/'
 hdfs_user = 'user'
@@ -16,12 +17,41 @@ dshop_config = {
     'hdfs_user': hdfs_user
 }
 
+api_config = {
+    'baseUrl': 'https://robot-dreams-de-api.herokuapp.com',
+    'outputDir': '/bronze/api',
+    'auth': {'endpoint': '/auth',
+             'username': 'rd_dreams',
+             'password': 'djT6LasE'},
+    'api': {'endpoint': '/out_of_stock'},
+    'hdfs_url': hdfs_url,
+    'hdfs_user': hdfs_user
+}
+
 table_list = ('aisles', 'clients', 'departments', 'orders', 'products')
 
 db_dag = DAG(
     'homework_07_dshop',
-    start_date=datetime(2021, 8, 13),
+    start_date=datetime(2021, 8, 11),
+    end_date=datetime(2021, 8, 11),
     schedule_interval='@daily'
+)
+
+
+api_dag = DAG(
+    'homework_07_api_export',
+    start_date=datetime(2021, 8, 11),
+    end_date=datetime(2021, 8, 11),
+    schedule_interval='@daily'
+)
+
+
+api_operator = PythonOperator(
+    dag=api_dag,
+    task_id='api_export',
+    provide_context=True,
+    python_callable=api_export,
+    params=api_config
 )
 
 
